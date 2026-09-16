@@ -31,6 +31,7 @@ const SOURCES = {
 } as const;
 type SourceKey = keyof typeof SOURCES;
 const PAGE_SIZE = 200;
+const FILE_TYPES = ["all", "sm", "sk", "s", "mi", "m", "t", "bp", "wid"];
 
 function formatAssetPath(assetPath: string, addC: boolean) {
   let p = assetPath;
