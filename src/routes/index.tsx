@@ -91,6 +91,7 @@ function AssetThumb({ apiPath }: { apiPath: string }) {
 
 function Index() {
   const [source, setSource] = useState<SourceKey>("all");
+  const [fileType, setFileType] = useState<string>("all");
   const [status, setStatus] = useState<Status>("idle");
   const [count, setCount] = useState(0);
   const cacheRef = useRef<Partial<Record<SourceKey, string[]>>>({});
