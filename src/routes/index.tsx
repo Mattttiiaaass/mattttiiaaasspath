@@ -141,11 +141,15 @@ function Index() {
   const results = useMemo(() => {
     const kws = submitted.toLowerCase().split(/[\s,]+/).filter(Boolean);
     if (!kws.length || status !== "ready") return [];
+    const prefix = fileType === "all" ? null : fileType.toLowerCase() + "_";
     return assetsRef.current.filter((p) => {
       const lower = p.toLowerCase();
-      return kws.every((kw) => lower.includes(kw));
+      if (!kws.every((kw) => lower.includes(kw))) return false;
+      if (!prefix) return true;
+      const name = lower.split("/").pop() ?? lower;
+      return name.startsWith(prefix);
     });
-  }, [submitted, status, source]);
+  }, [submitted, status, source, fileType]);
 
   const shown = results.slice(0, limit);
 
