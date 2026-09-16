@@ -31,6 +31,7 @@ const SOURCES = {
 } as const;
 type SourceKey = keyof typeof SOURCES;
 const PAGE_SIZE = 200;
+const FILE_TYPES = ["all", "sm", "sk", "s", "mi", "m", "t", "bp", "wid"];
 
 function formatAssetPath(assetPath: string, addC: boolean) {
   let p = assetPath;
@@ -91,6 +92,7 @@ function AssetThumb({ apiPath }: { apiPath: string }) {
 
 function Index() {
   const [source, setSource] = useState<SourceKey>("all");
+  const [fileType, setFileType] = useState<string>("all");
   const [status, setStatus] = useState<Status>("idle");
   const [count, setCount] = useState(0);
   const cacheRef = useRef<Partial<Record<SourceKey, string[]>>>({});
@@ -141,11 +143,15 @@ function Index() {
   const results = useMemo(() => {
     const kws = submitted.toLowerCase().split(/[\s,]+/).filter(Boolean);
     if (!kws.length || status !== "ready") return [];
+    const prefix = fileType === "all" ? null : fileType.toLowerCase() + "_";
     return assetsRef.current.filter((p) => {
       const lower = p.toLowerCase();
-      return kws.every((kw) => lower.includes(kw));
+      if (!kws.every((kw) => lower.includes(kw))) return false;
+      if (!prefix) return true;
+      const name = lower.split("/").pop() ?? lower;
+      return name.startsWith(prefix);
     });
-  }, [submitted, status, source]);
+  }, [submitted, status, source, fileType]);
 
   const shown = results.slice(0, limit);
 
@@ -222,6 +228,26 @@ function Index() {
                 }`}
               >
                 {key}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {FILE_TYPES.map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  if (t === fileType) return;
+                  setFileType(t);
+                  setLimit(PAGE_SIZE);
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold uppercase transition ${
+                  fileType === t
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
               </button>
             ))}
           </div>
