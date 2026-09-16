@@ -206,7 +206,27 @@ function Index() {
           >
             Assets
           </label>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-2 inline-flex rounded-xl border border-border bg-background p-1">
+            {(["all", "new"] as SourceKey[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => {
+                  if (key === source) return;
+                  setSource(key);
+                  setLimit(PAGE_SIZE);
+                }}
+                className={`rounded-lg px-5 py-2 text-sm font-semibold capitalize transition ${
+                  source === key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <input
               id="keywords"
               value={query}
