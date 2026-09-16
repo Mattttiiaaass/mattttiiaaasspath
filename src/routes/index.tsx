@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import assetIndex from "@/assets/fortnite_assets.gz.asset.json";
+import assetIndexAll from "@/assets/fortnite_assets_all.gz.asset.json";
+import assetIndexNew from "@/assets/fortnite_assets_new.gz.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
