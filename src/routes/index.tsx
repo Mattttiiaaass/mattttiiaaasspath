@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import assetIndex from "@/assets/fortnite_assets.gz.asset.json";
+import assetIndexAll from "@/assets/fortnite_assets_all.gz.asset.json";
+import assetIndexNew from "@/assets/fortnite_assets_new.gz.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,7 +25,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const ASSETS_URL = assetIndex.url;
+const SOURCES = {
+  all: assetIndexAll.url,
+  new: assetIndexNew.url,
+} as const;
+type SourceKey = keyof typeof SOURCES;
 const PAGE_SIZE = 200;
 
 function formatAssetPath(assetPath: string, addC: boolean) {
@@ -85,8 +90,10 @@ function AssetThumb({ apiPath }: { apiPath: string }) {
 
 
 function Index() {
+  const [source, setSource] = useState<SourceKey>("all");
   const [status, setStatus] = useState<Status>("idle");
   const [count, setCount] = useState(0);
+  const cacheRef = useRef<Partial<Record<SourceKey, string[]>>>({});
   const assetsRef = useRef<string[]>([]);
 
   const [query, setQuery] = useState("");
@@ -99,9 +106,16 @@ function Index() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      const cached = cacheRef.current[source];
+      if (cached) {
+        assetsRef.current = cached;
+        setCount(cached.length);
+        setStatus("ready");
+        return;
+      }
       setStatus("loading");
       try {
-        const res = await fetch(ASSETS_URL);
+        const res = await fetch(SOURCES[source]);
         if (!res.ok) throw new Error(String(res.status));
         const buffer = await res.arrayBuffer();
         const stream = new Blob([buffer])
@@ -109,8 +123,10 @@ function Index() {
           .pipeThrough(new DecompressionStream("gzip"));
         const text = await new Response(stream).text();
         if (cancelled) return;
-        assetsRef.current = text.split("\n").filter(Boolean);
-        setCount(assetsRef.current.length);
+        const list = text.split("\n").filter(Boolean);
+        cacheRef.current[source] = list;
+        assetsRef.current = list;
+        setCount(list.length);
         setStatus("ready");
       } catch {
         if (!cancelled) setStatus("error");
@@ -120,7 +136,7 @@ function Index() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [source]);
 
   const results = useMemo(() => {
     const kws = submitted.toLowerCase().split(/[\s,]+/).filter(Boolean);
@@ -129,7 +145,7 @@ function Index() {
       const lower = p.toLowerCase();
       return kws.every((kw) => lower.includes(kw));
     });
-  }, [submitted, status]);
+  }, [submitted, status, source]);
 
   const shown = results.slice(0, limit);
 
@@ -190,7 +206,27 @@ function Index() {
           >
             Assets
           </label>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-2 inline-flex rounded-xl border border-border bg-background p-1">
+            {(["all", "new"] as SourceKey[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => {
+                  if (key === source) return;
+                  setSource(key);
+                  setLimit(PAGE_SIZE);
+                }}
+                className={`rounded-lg px-5 py-2 text-sm font-semibold capitalize transition ${
+                  source === key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <input
               id="keywords"
               value={query}
