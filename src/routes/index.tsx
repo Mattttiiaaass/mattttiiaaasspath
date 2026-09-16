@@ -90,8 +90,10 @@ function AssetThumb({ apiPath }: { apiPath: string }) {
 
 
 function Index() {
+  const [source, setSource] = useState<SourceKey>("all");
   const [status, setStatus] = useState<Status>("idle");
   const [count, setCount] = useState(0);
+  const cacheRef = useRef<Partial<Record<SourceKey, string[]>>>({});
   const assetsRef = useRef<string[]>([]);
 
   const [query, setQuery] = useState("");
@@ -104,9 +106,16 @@ function Index() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      const cached = cacheRef.current[source];
+      if (cached) {
+        assetsRef.current = cached;
+        setCount(cached.length);
+        setStatus("ready");
+        return;
+      }
       setStatus("loading");
       try {
-        const res = await fetch(ASSETS_URL);
+        const res = await fetch(SOURCES[source]);
         if (!res.ok) throw new Error(String(res.status));
         const buffer = await res.arrayBuffer();
         const stream = new Blob([buffer])
@@ -114,8 +123,10 @@ function Index() {
           .pipeThrough(new DecompressionStream("gzip"));
         const text = await new Response(stream).text();
         if (cancelled) return;
-        assetsRef.current = text.split("\n").filter(Boolean);
-        setCount(assetsRef.current.length);
+        const list = text.split("\n").filter(Boolean);
+        cacheRef.current[source] = list;
+        assetsRef.current = list;
+        setCount(list.length);
         setStatus("ready");
       } catch {
         if (!cancelled) setStatus("error");
@@ -125,7 +136,7 @@ function Index() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [source]);
 
   const results = useMemo(() => {
     const kws = submitted.toLowerCase().split(/[\s,]+/).filter(Boolean);
@@ -134,7 +145,7 @@ function Index() {
       const lower = p.toLowerCase();
       return kws.every((kw) => lower.includes(kw));
     });
-  }, [submitted, status]);
+  }, [submitted, status, source]);
 
   const shown = results.slice(0, limit);
 
