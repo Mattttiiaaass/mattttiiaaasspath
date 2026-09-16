@@ -25,7 +25,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const ASSETS_URL = assetIndex.url;
+const SOURCES = {
+  all: assetIndexAll.url,
+  new: assetIndexNew.url,
+} as const;
+type SourceKey = keyof typeof SOURCES;
 const PAGE_SIZE = 200;
 
 function formatAssetPath(assetPath: string, addC: boolean) {
