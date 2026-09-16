@@ -231,6 +231,26 @@ function Index() {
             ))}
           </div>
 
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {FILE_TYPES.map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  if (t === fileType) return;
+                  setFileType(t);
+                  setLimit(PAGE_SIZE);
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold uppercase transition ${
+                  fileType === t
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <input
               id="keywords"
