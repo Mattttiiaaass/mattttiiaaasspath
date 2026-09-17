@@ -55,6 +55,7 @@ export const Route = createFileRoute("/api/public/asset-json")({
                   headers: {
                     "content-type": "application/json; charset=utf-8",
                     "cache-control": "public, max-age=3600",
+                    "access-control-allow-origin": "*",
                   },
                 });
               }
@@ -78,7 +79,10 @@ export const Route = createFileRoute("/api/public/asset-json")({
           ),
           {
             status: 404,
-            headers: { "content-type": "application/json; charset=utf-8" },
+            headers: {
+              "content-type": "application/json; charset=utf-8",
+              "access-control-allow-origin": "*",
+            },
           },
         );
       },
