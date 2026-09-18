@@ -36,6 +36,7 @@
   button.primary{background:var(--primary);color:var(--primary-fg);border:0;border-radius:.75rem;padding:.75rem 1.5rem;font-weight:600;cursor:pointer}
   button.primary:disabled{opacity:.5;cursor:default}
   .opts{display:flex;gap:1.25rem;margin-top:1rem;font-size:.875rem;flex-wrap:wrap}
+  .switches{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.65rem}.switches button{border:1px solid var(--border);background:var(--bg);color:var(--muted-fg);border-radius:.5rem;padding:.45rem .75rem;font-size:.75rem;font-weight:700;text-transform:uppercase;cursor:pointer}.switches button.active{border-color:var(--primary);background:var(--primary);color:var(--primary-fg)}
   .opts label{display:flex;align-items:center;gap:.5rem;cursor:pointer}
   ul{list-style:none;margin:.75rem 0 0;padding:0;border:1px solid var(--border);border-radius:1rem;overflow:hidden;background:var(--card)}
   li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.75rem;align-items:center;padding:.75rem;border-top:1px solid var(--border)}
@@ -77,6 +78,8 @@
 <main>
   <section class="panel">
     <label class="tag" for="keywords">Assets</label>
+    <div class="switches" id="sources"><button class="active" data-source="all">All</button><button data-source="new">New</button></div>
+    <div class="switches" id="types"><button class="active" data-type="all">All</button><button data-type="sm">SM</button><button data-type="sk">SK</button><button data-type="s">S</button><button data-type="mi">MI</button><button data-type="m">M</button><button data-type="t">T</button><button data-type="bp">BP</button><button data-type="wid">WID</button></div>
     <div class="row">
       <input id="keywords" type="text" autocomplete="off" placeholder="Keywords separated by spaces or commas" />
       <button class="primary" id="searchBtn" disabled>Loading…</button>
@@ -98,11 +101,15 @@
 </main>
 
 <script>
-const ASSETS_URL = "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/f0096f3e-a3a7-40da-a1f7-4abfd996bab3/fortnite_assets_all.gz";
+const ASSET_URLS = {
+  all: "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/54df028e-4de7-4ea9-8ff5-a7382f6ef011/fortnite_assets_all.gz",
+  new: "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/37d3d391-4c0e-4520-b0b1-7ddd8b7cddf9/fortnite_assets_new.gz"
+};
 const PAGE_SIZE = 200;
 const COSMETIC_ID = /(cid|bid|eid|glider|pickaxe|wrap|musicpack|loadingscreen|trails)_[a-z0-9_]+/gi;
 
-let assets = [], results = [], limit = PAGE_SIZE, submitted = "";
+let assets = [], results = [], limit = PAGE_SIZE, submitted = "", source = "all", fileType = "all";
+const assetCache = {};
 
 const $ = (id) => document.getElementById(id);
 
@@ -162,16 +169,17 @@ function makeThumb(apiPath) {
 
 async function loadAssets() {
   try {
-    const res = await fetch(ASSETS_URL);
+    if (assetCache[source]) { assets = assetCache[source]; finishLoad(); return; }
+    $("searchBtn").disabled = true; $("searchBtn").textContent = "Loading…";
+    $("status").textContent = "Loading asset index…";
+    const res = await fetch(ASSET_URLS[source]);
     if (!res.ok) throw new Error(String(res.status));
     const buffer = await res.arrayBuffer();
     const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
     const text = await new Response(stream).text();
     assets = text.split("\n").filter(Boolean);
-    $("status").textContent = assets.length.toLocaleString() + " paths indexed";
-    $("dot").className = "dot ready";
-    $("searchBtn").disabled = false;
-    $("searchBtn").textContent = "Search";
+    assetCache[source] = assets;
+    finishLoad();
   } catch {
     $("status").textContent = "Index failed to load";
     $("dot").className = "dot error";
@@ -179,11 +187,24 @@ async function loadAssets() {
   }
 }
 
+function finishLoad() {
+  $("status").textContent = assets.length.toLocaleString() + " paths indexed";
+  $("dot").className = "dot ready";
+  $("searchBtn").disabled = false;
+  $("searchBtn").textContent = "Search";
+  if (submitted) search(); else render();
+}
+
 function search() {
   limit = PAGE_SIZE;
   submitted = $("keywords").value.trim();
   const kws = submitted.toLowerCase().split(/[\s,]+/).filter(Boolean);
-  results = kws.length ? assets.filter((p) => { const l = p.toLowerCase(); return kws.every((k) => l.includes(k)); }) : [];
+  results = kws.length ? assets.filter((p) => {
+    const l = p.toLowerCase();
+    if (!kws.every((k) => l.includes(k))) return false;
+    if (fileType === "all") return true;
+    return (l.split("/").pop() || l).startsWith(fileType + "_");
+  }) : [];
   render();
 }
 
@@ -238,6 +259,20 @@ $("keywords").addEventListener("keydown", (e) => { if (e.key === "Enter") search
 $("formatted").onchange = render;
 $("addC").onchange = render;
 $("moreBtn").onclick = () => { limit += PAGE_SIZE; render(); };
+document.querySelectorAll("#sources button").forEach((button) => {
+  button.onclick = () => {
+    source = button.dataset.source; limit = PAGE_SIZE;
+    document.querySelectorAll("#sources button").forEach((b) => b.classList.toggle("active", b === button));
+    loadAssets();
+  };
+});
+document.querySelectorAll("#types button").forEach((button) => {
+  button.onclick = () => {
+    fileType = button.dataset.type; limit = PAGE_SIZE;
+    document.querySelectorAll("#types button").forEach((b) => b.classList.toggle("active", b === button));
+    if (submitted) search(); else render();
+  };
+});
 
 // Build an installable web app manifest at runtime so this single file can be
 // added to a phone home screen and open without browser chrome.

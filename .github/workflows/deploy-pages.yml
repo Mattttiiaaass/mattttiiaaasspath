@@ -26,6 +26,17 @@ jobs:
         run: |
           mkdir -p dist
           cp public/standalone.html dist/index.html
+          cp public/json-standalone.html dist/json.html
+          cp public/favicon.png public/icon-192.png public/icon-512.png public/manifest.webmanifest dist/
+          curl --fail --location --retry 3 \
+            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/54df028e-4de7-4ea9-8ff5-a7382f6ef011/fortnite_assets_all.gz" \
+            --output dist/fortnite_assets_all.gz
+          curl --fail --location --retry 3 \
+            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/37d3d391-4c0e-4520-b0b1-7ddd8b7cddf9/fortnite_assets_new.gz" \
+            --output dist/fortnite_assets_new.gz
+          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/54df028e-4de7-4ea9-8ff5-a7382f6ef011/fortnite_assets_all.gz#./fortnite_assets_all.gz#' dist/index.html
+          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/37d3d391-4c0e-4520-b0b1-7ddd8b7cddf9/fortnite_assets_new.gz#./fortnite_assets_new.gz#' dist/index.html
+          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/api/public/asset-json?path=#./json.html?path=#' dist/index.html
           # GitHub Pages serves .well-known with Jekyll disabled
           touch dist/.nojekyll
           if [ -d public/.well-known ]; then cp -r public/.well-known dist/; fi

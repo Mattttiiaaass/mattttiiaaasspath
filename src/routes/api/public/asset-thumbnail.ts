@@ -256,7 +256,7 @@ async function fromDilly(assetPath: string) {
         /"(?:AssetPathName|ObjectPath|ObjectName)"\s*:\s*"([^"]*(?:Icon|Preview|T_|T-|Texture)[^"]*)"/gi,
       ),
     ]
-      .map((m) => (m[1] ?? "").split("'").pop()!.replace(/"/g, ""))
+      .map((m) => (m[1] ?? "").split("'").pop()?.replace(/"/g, "") ?? "")
       .map((p) => p.split(".")[0] ?? p)
       .filter(Boolean);
 
