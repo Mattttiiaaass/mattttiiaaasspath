@@ -128,26 +128,12 @@ function formatAssetPath(assetPath, addC) {
 }
 
 function previewUrl(apiPath) {
-  return "https://mattttiiaaasspathfinder.lovable.app/api/public/asset-json?path=" + encodeURIComponent(apiPath);
+  return "https://mattttiiaaasspathfinder.lovable.app/json?path=" + encodeURIComponent(apiPath);
 }
 
 function thumbnailCandidates(assetPath) {
-  const clean = assetPath.split(".")[0] || assetPath;
-  const segments = clean.split("/").filter(Boolean);
-  const ids = [];
-  for (const segment of segments) {
-    ids.push(segment);
-    for (const match of segment.matchAll(COSMETIC_ID)) if (match[0]) ids.push(match[0]);
-  }
-  for (const value of [...ids]) {
-    const parts = value.split("_");
-    while (parts.length > 3) { parts.pop(); ids.push(parts.join("_")); }
-  }
-  const unique = [...new Set(ids.filter(Boolean).map((id) => id.toLowerCase()))];
-  return unique.flatMap((id) => [
-    "https://fortnite-api.com/images/cosmetics/br/" + encodeURIComponent(id) + "/smallicon.png",
-    "https://fortnite-api.com/images/cosmetics/br/" + encodeURIComponent(id) + "/icon.png",
-  ]);
+  // The thumbnail service resolves the real preview image for any asset path.
+  return ["https://mattttiiaaasspathfinder.lovable.app/api/public/asset-thumbnail?path=" + encodeURIComponent(assetPath)];
 }
 
 function makeThumb(apiPath) {
