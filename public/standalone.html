@@ -128,7 +128,8 @@ function formatAssetPath(assetPath, addC) {
 }
 
 function previewUrl(apiPath) {
-  return "https://mattttiiaaasspathfinder.lovable.app/json?path=" + encodeURIComponent(apiPath);
+  // Same-site JSON viewer; "back" sends the user back to this exact page.
+  return "https://mattttiiaaasspathfinder.lovable.app/json-standalone.html?path=" + encodeURIComponent(apiPath) + "&back=" + encodeURIComponent(location.href.split("?")[0]);
 }
 
 function thumbnailCandidates(assetPath) {
@@ -148,7 +149,7 @@ function makeThumb(apiPath) {
   img.referrerPolicy = "no-referrer";
   img.style.opacity = "0";
   img.onload = () => { img.style.opacity = "1"; };
-  img.onerror = () => { i += 1; if (i < candidates.length) img.src = candidates[i]; else img.remove(); };
+  img.onerror = () => { i += 1; if (i < candidates.length) img.src = candidates[i]; else wrap.remove(); };
   if (candidates.length) { img.src = candidates[0]; wrap.appendChild(img); }
   return wrap;
 }
@@ -221,7 +222,7 @@ function render() {
     const actions = document.createElement("div");
     actions.className = "actions";
     const a = document.createElement("a");
-    a.href = previewUrl(apiPath); a.target = "_blank"; a.rel = "noreferrer"; a.textContent = "JSON";
+    a.href = previewUrl(apiPath); a.textContent = "JSON";
     const btn = document.createElement("button");
     btn.textContent = "Copy";
     btn.onclick = async () => {
