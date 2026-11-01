@@ -29,13 +29,13 @@ jobs:
           cp public/json-standalone.html dist/json.html
           cp public/favicon.png public/icon-192.png public/icon-512.png public/manifest.webmanifest dist/
           curl --fail --location --retry 3 \
-            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/9f9a6de9-6879-498b-a548-16fa93f9df8b/fortnite_assets_all.gz" \
+            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/c6e0a1ae-a39b-483c-a083-47d9a7d8f40c/fortnite_assets_all.gz" \
             --output dist/fortnite_assets_all.gz
           curl --fail --location --retry 3 \
-            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/bf48f304-b2ba-4660-a359-936d0e9cc709/fortnite_assets_new.gz" \
+            "https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/f66999b7-6b6f-4c4c-a6cf-e656d3022abc/fortnite_assets_new.gz" \
             --output dist/fortnite_assets_new.gz
-          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/9f9a6de9-6879-498b-a548-16fa93f9df8b/fortnite_assets_all.gz#./fortnite_assets_all.gz#' dist/index.html
-          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/bf48f304-b2ba-4660-a359-936d0e9cc709/fortnite_assets_new.gz#./fortnite_assets_new.gz#' dist/index.html
+          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/c6e0a1ae-a39b-483c-a083-47d9a7d8f40c/fortnite_assets_all.gz#./fortnite_assets_all.gz#' dist/index.html
+          sed -i 's#https://mattttiiaaasspathfinder.lovable.app/__l5e/assets-v1/f66999b7-6b6f-4c4c-a6cf-e656d3022abc/fortnite_assets_new.gz#./fortnite_assets_new.gz#' dist/index.html
           sed -i 's#https://mattttiiaaasspathfinder.lovable.app/json-standalone.html?path=#./json.html?path=#' dist/index.html
           # GitHub Pages serves .well-known with Jekyll disabled
           touch dist/.nojekyll
