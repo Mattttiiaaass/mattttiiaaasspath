@@ -352,18 +352,16 @@ function Index() {
                     >
                       JSON
                     </a>
-                    {/\/(sm|sk)_[^/]*$/i.test(raw) && (
-                      <button
-                        onClick={() => {
-                          void navigator.clipboard.writeText(apiPath).catch(() => {});
-                          setViewer(apiPath);
-                        }}
-                        title="Copies the path and opens the 3D viewer — paste it there and tap Render 3D model"
-                        className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary sm:flex-none sm:px-2 sm:py-1"
-                      >
-                        3D
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        void navigator.clipboard.writeText(apiPath).catch(() => {});
+                        setViewer(apiPath);
+                      }}
+                      title="Copies the path and opens the 3D viewer — paste it there and tap Render 3D model"
+                      className="flex-1 rounded-lg border border-primary/50 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/20 sm:flex-none sm:px-2 sm:py-1"
+                    >
+                      3D
+                    </button>
                     <button
                       onClick={() => void copy(display)}
                       className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary sm:flex-none sm:px-2 sm:py-1"
