@@ -104,6 +104,7 @@ function Index() {
   const [addC, setAddC] = useState(false);
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [copied, setCopied] = useState<string | null>(null);
+  const [viewer, setViewer] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -355,7 +356,7 @@ function Index() {
                       <button
                         onClick={() => {
                           void navigator.clipboard.writeText(apiPath).catch(() => {});
-                          window.open("https://e8uc.github.io/Fortnite-agent/ManualSearch/Paths", "_blank", "noreferrer");
+                          setViewer(apiPath);
                         }}
                         title="Copies the path and opens the 3D viewer — paste it there and tap Render 3D model"
                         className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary sm:flex-none sm:px-2 sm:py-1"
@@ -391,6 +392,34 @@ function Index() {
           </p>
         )}
       </main>
+
+      {viewer && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-background">
+          <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+            <button
+              onClick={() => setViewer(null)}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary"
+            >
+              ← Back
+            </button>
+            <p className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground" title={viewer}>
+              Path copied — paste it below and tap Render 3D model
+            </p>
+            <button
+              onClick={() => void copy(viewer)}
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+            >
+              {copied === viewer ? "Copied" : "Copy path"}
+            </button>
+          </div>
+          <iframe
+            src="https://e8uc.github.io/Fortnite-agent/ManualSearch/Paths"
+            title="3D viewer"
+            className="w-full flex-1 border-0"
+            allow="clipboard-read; clipboard-write; fullscreen"
+          />
+        </div>
+      )}
     </div>
   );
 }
